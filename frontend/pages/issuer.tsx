@@ -68,7 +68,7 @@ export default function Home() {
         <h1 className="text-center text-4xl font-bold">
           ELVTD Application Portal
         </h1>
-        <p className="leading-relaxecd w-full p-8 text-lg">
+        <p className="w-full pt-8 text-lg leading-relaxed">
           Hello human! Welcome to ELVTD Application Portal where you can apply
           for claims about yourself. These claims can be anything about you, for
           example your age, name, certifications, etc.
