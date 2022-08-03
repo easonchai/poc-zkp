@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/iden3/go-circuits"
 	core "github.com/iden3/go-iden3-core"
 	"github.com/iden3/go-iden3-crypto/babyjub"
 	poseidon "github.com/iden3/go-iden3-crypto/poseidon"
@@ -19,12 +18,12 @@ type verifyClaimCircuitInputs struct {
 	SignatureR8X string      `json:"sigR8x"`
 	SignatureR8Y string      `json:"sigR8y"`
 	SignatureS   string      `json:"sigS"`
-	PubKeyX      string      `json:"pubKeyX"`
-	PubKeyY      string      `json:"pubKeyY"`
-	ClaimSchema  string      `json:"claimSchema"`
-	SlotIndex    int         `json:"slotIndex"`
-	Operator     int         `json:"operator"`
-	Value        []*big.Int  `json:"value"`
+	// PubKeyX      string      `json:"pubKeyX"`
+	// PubKeyY      string      `json:"pubKeyY"`
+	// ClaimSchema  string      `json:"claimSchema"`
+	// SlotIndex    int         `json:"slotIndex"`
+	// Operator     int         `json:"operator"`
+	// Value        []*big.Int  `json:"value"`
 }
 
 func signClaim(age int64) string {
@@ -38,8 +37,8 @@ func signClaim(age int64) string {
 
 	hex.Decode(privKey[:], []byte(privKHex))
 
-	X := privKey.Public().X
-	Y := privKey.Public().Y
+	// X := privKey.Public().X
+	// Y := privKey.Public().Y
 
 	// issue claim for user adding 25 in the data slot for age
 	dataSlotA, _ := core.NewElemBytesFromInt(big.NewInt(age))
@@ -68,18 +67,18 @@ func signClaim(age int64) string {
 	// SlotIndex identifies the location inside the claim of the queried data
 	// Values identifies the queried value
 	// Operator 2 means "more than"
-	query := circuits.Query{
-		SlotIndex: 2,
-		Values:    []*big.Int{new(big.Int).SetInt64(18)},
-		Operator:  3,
-	}
+	// query := circuits.Query{
+	// 	SlotIndex: 2,
+	// 	Values:    []*big.Int{new(big.Int).SetInt64(18)},
+	// 	Operator:  3,
+	// }
 
-	q := make([]*big.Int, 63)
-	for i := 0; i < 63; i++ {
-		q[i] = big.NewInt(0)
-	}
+	// q := make([]*big.Int, 63)
+	// for i := 0; i < 63; i++ {
+	// 	q[i] = big.NewInt(0)
+	// }
 
-	values := append(query.Values, q...)
+	// values := append(query.Values, q...)
 
 	// Issuer signs the claim
 	claimSignature := privKey.SignPoseidon(commonHash.BigInt())
@@ -91,12 +90,12 @@ func signClaim(age int64) string {
 		SignatureR8X: claimSignature.R8.X.String(),
 		SignatureR8Y: claimSignature.R8.Y.String(),
 		SignatureS:   claimSignature.S.String(),
-		PubKeyX:      X.String(),
-		PubKeyY:      Y.String(),
-		ClaimSchema:  ageClaim.GetSchemaHash().BigInt().String(),
-		SlotIndex:    query.SlotIndex,
-		Operator:     query.Operator,
-		Value:        values,
+		// PubKeyX:      X.String(),
+		// PubKeyY:      Y.String(),
+		// ClaimSchema:  ageClaim.GetSchemaHash().BigInt().String(),
+		// SlotIndex:    query.SlotIndex,
+		// Operator:     query.Operator,
+		// Value:        values,
 	}
 
 	jsonData, _ := json.Marshal(circuitInputs)
