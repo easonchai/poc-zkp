@@ -1,9 +1,54 @@
 import Head from "next/head";
 import { useRouter } from "next/router";
-import React from "react";
+import { useState } from "react";
+import { toast } from "react-toastify";
+import ConnectWallet from "src/wagmi/ConnectWallet";
+import { useAccount } from "wagmi";
 
 export default function Home() {
+  const { address, isConnected } = useAccount();
+  const [age, setAge] = useState<number>(0);
+  const [claimData, setClaimData] = useState<any>();
+  const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
+
+  const submitApplication = async () => {
+    // We make a call to our backend to generate a claim and return it
+    setLoading(true);
+
+    if (isNaN(age)) {
+      toast.error("Invalid age!", {
+        toastId: "error",
+      });
+      setAge(0);
+    } else {
+      const data = await fetch("http://localhost:3001", {
+        method: "POST",
+        body: JSON.stringify({
+          age,
+        }),
+      })
+        .then((response) => response.json())
+        .catch((err) => {
+          console.error("ERR", err);
+          toast.error(`Something went wrong!`, {
+            toastId: "error",
+          });
+          return null;
+        });
+
+      if (data) {
+        setClaimData(data);
+        toast.success(
+          "Application submitted! Please wait for 1-2 business days for your application to be approved and claim to be issued",
+          {
+            toastId: "success",
+          },
+        );
+      }
+    }
+    setLoading(false);
+  };
 
   return (
     <div className="relative flex h-full w-screen flex-col bg-pink-100">
@@ -34,23 +79,44 @@ export default function Home() {
           <br />
           <br />
           To get started, follow these steps:
-          <ol className="list-decimal">
-            <li>Connect your wallet and insert your age</li>
-            <li>Click submit application</li>
-            <li>
-              Wait for your application to be approved by ELVTD. This process
-              may take 1-2 business days
-            </li>
-            <li>
-              After your claim is approved, log in to your user portal where you
-              can manage your claims and generate proofs for them if needed
-            </li>
-            <li>
-              Use your proof in any partner platform that accepts our claims!
-            </li>
-          </ol>
         </p>
-        <div className="flex w-full flex-row items-center justify-center space-x-8">
+        <ol className="list-decimal">
+          <li>Connect your wallet and insert your age</li>
+          <li>Click submit application</li>
+          <li>
+            Wait for your application to be approved by ELVTD. This process may
+            take 1-2 business days
+          </li>
+          <li>
+            After your claim is approved, log in to your user portal where you
+            can manage your claims and generate proofs for them if needed
+          </li>
+          <li>
+            Use your proof in any partner platform that accepts our claims!
+          </li>
+        </ol>
+        <div className="my-8 flex w-full flex-col items-center justify-center space-y-4">
+          <p className="text-2xl font-bold">Step 1: Connect Wallet</p>
+          {address && <p>Connected to {address}</p>}
+          <ConnectWallet />
+          <p className="text-2xl font-bold">Step 2: Insert Age</p>
+          <input
+            type="number"
+            placeholder="Enter your age"
+            className="input input-bordered input-primary w-full max-w-xs bg-white"
+            onChange={(e) => setAge(Number(e.target.value))}
+          />
+          <p className="text-2xl font-bold">Step 3: Submit Application</p>
+          <button
+            className={`btn btn-success bg-green-400 ${
+              loading ? "loading" : ""
+            }`}
+            onClick={submitApplication}
+          >
+            Submit
+          </button>
+        </div>
+        <div className="mt-12 flex w-full flex-row items-center justify-center space-x-8">
           <button
             className="btn btn-secondary"
             onClick={() => router.push("/profile")}

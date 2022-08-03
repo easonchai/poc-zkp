@@ -14,6 +14,7 @@ import (
 const keyServerAddr = "serverAddr"
 
 func getRoot(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	ctx := r.Context()
 
 	// Get body
