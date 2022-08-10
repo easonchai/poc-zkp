@@ -1,14 +1,19 @@
+import dynamic from "next/dynamic";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { toast } from "react-toastify";
-import ConnectWallet from "src/wagmi/ConnectWallet";
 import { useAccount } from "wagmi";
+import { useStore } from "../src/utils/store";
+
+const ConnectWallet = dynamic(() => import("../src/wagmi/ConnectWallet"), {
+  ssr: false,
+});
 
 export default function Home() {
-  const { address, isConnected } = useAccount();
+  const { address } = useAccount();
   const [age, setAge] = useState<number>(0);
-  const [claimData, setClaimData] = useState<any>();
+  const { setClaimData } = useStore();
   const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
 

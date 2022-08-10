@@ -1,9 +1,11 @@
 import Head from "next/head";
 import { useRouter } from "next/router";
 import React from "react";
+import { useStore } from "src/utils/store";
 
 export default function Home() {
   const router = useRouter();
+  const { claimData } = useStore();
 
   return (
     <div className="relative flex h-full w-screen flex-col bg-violet-100">
@@ -22,32 +24,36 @@ export default function Home() {
       <main className="flex h-full min-h-screen w-full flex-col p-16 text-black">
         <h1 className="text-center text-4xl font-bold">User Portal</h1>
         <p className="w-full pt-8 text-lg leading-relaxed">
-          Hello human! Welcome to ELVTD Application Portal where you can apply
-          for claims about yourself. These claims can be anything about you, for
-          example your age, name, certifications, etc.
+          Hello human! Welcome to your User Portal where you can view{" "}
+          <strong>approved</strong> claims about yourself. These claims can be
+          anything about you, for example your age, name, certifications, etc.
           <br />
           <br />
-          At ELVTD, we are the trusted source that is{" "}
-          <strong>certified to issue claims about your age</strong>!
+          Currently, only claims issued by ELVTD exist here!
           <br />
           <br />
-          To get started, follow these steps:
+          To use your claims, follow these steps:
         </p>
         <ol className="list-decimal">
-          <li>Connect your wallet and insert your age</li>
-          <li>Click submit application</li>
+          <li>Head over to any third party which accepts our claims</li>
           <li>
-            Wait for your application to be approved by ELVTD. This process may
-            take 1-2 business days
-          </li>
-          <li>
-            After your claim is approved, log in to your user portal where you
-            can manage your claims and generate proofs for them if needed
-          </li>
-          <li>
-            Use your proof in any partner platform that accepts our claims!
+            Click on your claim to generate a proof to be used on their site!
           </li>
         </ol>
+        {claimData && (
+          <div className="card my-12 w-128 transform bg-base-100 text-white shadow-xl duration-300 hover:scale-105">
+            <div className="card-body">
+              <h2 className="card-title">Age Claim</h2>
+              <p className="my-2 break-words">
+                Claim: <code>{claimData.claim.toString()}</code>
+              </p>
+              <p className="my-2 break-words">
+                Signature:{" "}
+                <code>{`${claimData.sigR8x},${claimData.sigR8y},${claimData.sigS}`}</code>
+              </p>
+            </div>
+          </div>
+        )}
         <div className="my-8 flex w-full flex-row items-center justify-center space-x-8">
           <button
             className="btn btn-primary"

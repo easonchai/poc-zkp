@@ -63,6 +63,7 @@ func main() {
 		},
 	}
 
+	fmt.Println("📡 Server is starting on port 3001")
 	err := server.ListenAndServe()
 	if errors.Is(err, http.ErrServerClosed) {
 		fmt.Printf("🛑 Server has been terminated\n")
