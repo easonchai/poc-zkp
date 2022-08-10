@@ -60,7 +60,6 @@ export const generateProof = async (
     pubInput.push(argv[i]);
   }
 
-  console.log("3");
   const solidityProof = [a, b, c, pubInput];
 
   return solidityProof;

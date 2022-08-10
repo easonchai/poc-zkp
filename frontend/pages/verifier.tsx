@@ -6,14 +6,15 @@ import { generateProof } from "src/utils/proof";
 import { useStore } from "src/utils/store";
 import ConnectWallet from "src/wagmi/ConnectWallet";
 import { useAccount } from "wagmi";
+import { ethers } from "ethers";
+import verifier from "src/types/verifier";
 
 export default function Home() {
   const router = useRouter();
   const { address } = useAccount();
   const { claimData } = useStore();
-  const [generating, setGenerating] = React.useState<boolean>(false);
   const [loading, setLoading] = React.useState<boolean>(false);
-  const [proof, setProof] = React.useState<any>();
+  const [proof, setProof] = React.useState<string[][]>();
 
   const calculateProof = async () => {
     if (!claimData) {
@@ -23,7 +24,6 @@ export default function Home() {
       return;
     }
 
-    setGenerating(true);
     toast.info("Generating proof...", {
       toastId: "generate",
     });
@@ -35,7 +35,8 @@ export default function Home() {
 
     try {
       const proof = await generateProof(claimData, wasmBuff, zkeyBuff);
-      console.log(proof);
+      setProof(proof);
+      toast.success("Proof generated successfully!");
     } catch (error) {
       toast.error("Proof generation Failed: " + error, {
         toastId: "generate",
@@ -43,12 +44,53 @@ export default function Home() {
     }
   };
 
-  const verifyProof = () => {
-    console.log(proof);
+  const verifyProof = async () => {
+    if (!proof) {
+      toast.error("Please generate your proof first!", {
+        toastId: "error",
+      });
+      return;
+    }
+
+    toast.info("Verifying proof...", {
+      toastId: "verify",
+    });
+
+    if (typeof window !== "undefined") {
+      const provider = new ethers.providers.JsonRpcProvider(
+        "https://rpc.ankr.com/eth_goerli",
+        "goerli",
+      );
+      const contract = new ethers.Contract(
+        verifier.address,
+        verifier.abi,
+        provider,
+      );
+
+      const a = proof[0];
+      const b = proof[1];
+      const c = proof[2];
+      const pubInput = proof[3];
+
+      try {
+        const verified = await contract.verifyProof(a, b, c, pubInput);
+        if (verified) {
+          toast.dismiss();
+          toast.success("Welcome to the bar!", {
+            toastId: "success",
+          });
+        }
+      } catch (error) {
+        console.log(error);
+        toast.error("Invalid proof! You are not authorized!", {
+          toastId: "error",
+        });
+      }
+    }
   };
 
   const getFileBuffer = async (filename: string) => {
-    let req = await fetch(filename);
+    const req = await fetch(filename);
     return Buffer.from(await req.arrayBuffer());
   };
 
@@ -91,9 +133,22 @@ export default function Home() {
             Step 2: Generate a proof from your claim
           </p>
           {address &&
-            (claimData ? (
+            (proof ? (
+              <div className="card my-12 w-256 transform bg-base-100 text-white shadow-xl duration-300 hover:scale-105 active:scale-100">
+                <div className="card-body">
+                  <h2 className="card-title">Age Proof</h2>
+                  <p className="my-2 break-words">
+                    Proof: <code>{proof.toString().slice(0, 256)}...</code>
+                    <small>
+                      Bro it&apos;s so long, you wouldn&apos;t even want to see
+                      it
+                    </small>
+                  </p>
+                </div>
+              </div>
+            ) : claimData ? (
               <div
-                className="card my-12 w-128 transform bg-base-100 text-white shadow-xl duration-300 hover:scale-105 active:scale-100"
+                className="card my-12 w-128 transform cursor-pointer bg-base-100 text-white shadow-xl duration-300 hover:scale-105 active:scale-100"
                 onClick={calculateProof}
               >
                 <div className="card-body">
